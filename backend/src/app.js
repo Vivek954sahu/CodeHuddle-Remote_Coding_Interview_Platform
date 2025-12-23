@@ -5,6 +5,7 @@ import morgan from "morgan";
 
 import { logger } from "./utils/logger.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
+import { responseMiddleware } from "./utils/ApiResponse.js";
 
 const app = express();
 
@@ -37,6 +38,9 @@ app.use(
         },
     })
 );
+
+// Response Middleware
+app.use(responseMiddleware);
 
 /* --------------------------------------------------------------------------------------------
     =====  Health check =====
