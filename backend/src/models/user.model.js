@@ -1,6 +1,5 @@
 import { bcrypt } from "bcryptjs";
 import mongoose from "mongoose";
-import { refreshToken } from "../modules/auth/auth.controller";
 
 const { Schema } = mongoose;
 
@@ -82,10 +81,10 @@ userSchema.pre("save", async function (next) {
 /**
  * Compare passsword for login
  */
-userSchema.methods.comparePassword = async function (password) {
+userSchema.methods.comparePassword = async function (userPassword) {
     if(!this.password) return false;
 
-    return bcrypt.compare(password, this.password);
+    return bcrypt.compare(userPassword, this.password);
 };
 
 /**
