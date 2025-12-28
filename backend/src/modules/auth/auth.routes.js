@@ -12,6 +12,7 @@ import {
 
 import { authenticate } from "../../middlewares/auth.middleware.js";
 import { authorize } from "../../middlewares/rbac.middleware.js";
+import { USER_ROLES } from "./auth.constants.js";
 
 const router = express.Router();
 
@@ -102,7 +103,7 @@ router.post("/logout", authenticate, asyncHandler(logout));
 router.post(
     "/admin-check",
     authenticate,
-    authorize("ADMIN"),
+    authorize(USER_ROLES.ADMIN),
     (req, res) => {
         res.ok({ user: req.user },
             "Admin access granted",
