@@ -135,7 +135,7 @@ export const oauthCallback =  async (req, res) => {
     return res.ok(
         { user: result.user,
         accessToken: result.accessToken },
-        " OAuth login successfullt.",
+        " OAuth login successfully.",
         null
     );
 };

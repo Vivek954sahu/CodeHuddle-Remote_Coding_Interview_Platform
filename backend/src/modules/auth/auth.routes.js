@@ -104,7 +104,9 @@ router.post(
     authenticate,
     authorize("ADMIN"),
     (req, res) => {
-        res.ok({ message: "Admin access granted" });
+        res.ok({ user: req.user },
+            "Admin access granted",
+        null);
     }
 );
 
