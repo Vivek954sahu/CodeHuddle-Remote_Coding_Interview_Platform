@@ -1,5 +1,7 @@
 import { ApiError } from "../../utils/ApiError.js";
+import { COOKIE_NAMES } from "./auth.constants.js";
 import { authService } from "./auth.service.js";
+import { loginSchema, registerSchema } from "./auth.validation.js";
 
 /**
  * ====================================================================================
@@ -7,31 +9,26 @@ import { authService } from "./auth.service.js";
  * ====================================================================================
  */
 export const register = async (req, res) => {
-    const { email, password, name, role } = req.body;
+    const { error, value } = registerSchema.validate(req.body);
 
-    if(!email || !password || !name) {
-        throw new ApiError(400, "Missing reuired fields");
+    if(error) {
+        throw ApiError.badRequest("Missing reuired fields", error);
     }
 
-    const result = await authService.register({
-        email,
-        password,
-        name,
-        role
-    });
+    const result = await authService.register(value);
 
     // set refresh token in httpOnly cookie
-    res.cookie("refreshToken", result.refreshToken, {
+    res.cookie(COOKIE_NAMES.REFRESH_TOKEN, result.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
         maxAge: 7 * 24 * 60 * 60 * 1000   // 7 days
     });
 
-    return res.created({
+    res.created({
         user: result.user,
         accessToken: result.accessToken
-    });
+    }, "User registered successfully");
 };
 
 /**
@@ -40,16 +37,16 @@ export const register = async (req, res) => {
  * ====================================================================================
  */
 export const login = async (req, res) => {
-    const { email, password } = req.body;
+    const { error, value } = loginSchema.validate(req.body);
 
-    if(!email || !password) {
-        throw new ApiError(400, "Email and password are required");
+    if(error) {
+        throw ApiError.badRequest("Email and password are required", error);
     }
 
-    const result = await authService.login({ email, password });
+    const result = await authService.login(value);
 
     // set refresh token in httpOnly cookie
-    res.cookie("refreshToken", result.refreshToken, {
+    res.cookie(COOKIE_NAMES.REFRESH_TOKEN, result.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
@@ -59,7 +56,7 @@ export const login = async (req, res) => {
     return res.ok({
         user: result.user,
         accessToken: result.accessToken
-    });
+    }, "Login successful", null);
 };
 
 /**
@@ -68,17 +65,26 @@ export const login = async (req, res) => {
  * ====================================================================================
  */
 export const refreshToken = async (req, res) => {
-    const token = req.cookies?.refreshToken || req.body.refreshToken;
+    const refreshToken = req.cookies?.[COOKIE_NAMES.REFRESH_TOKEN];
 
-    if(!token) {
+    if(!refreshToken) {
         throw new ApiError(401, "Refresh token missing");
     }
 
-    const result = await authService.refreshAccessToken(token);
+    const result = await authService.refreshAccessToken(refreshToken);
 
-    return res.ok({
-        accessToken: result.accessToken
+    res.cookie(COOKIE_NAMES.REFRESH_TOKEN, result.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000   // 7 days
     });
+
+    return res.ok(
+        { accessToken: result.accessToken},
+        "Token is refreshed successfully.",
+        null
+    );
 };
 
 /**
@@ -87,19 +93,19 @@ export const refreshToken = async (req, res) => {
  * ====================================================================================
  */
 export const logout = async (req, res) => {
-    const token = req.cookies?.refreshToken;
+    const refreshToken = req.cookies?.[COOKIE_NAMES.REFRESH_TOKEN];
 
     if(token){
-        await authService.logout(token);
+        await authService.logout(refreshToken);
     }
 
-    res.clearCookie("refreshToken", {
+    res.clearCookie(COOKIE_NAMES.REFRESH_TOKEN, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict"
     });
 
-    return res.ok({ message: "Logged out successfully" });
+    return res.ok(null, "Logged out successfully", null);
 };
 
 /**
@@ -115,7 +121,7 @@ export const oauthCallback =  async (req, res) => {
 
     const result = await authService.oauthLogin(req.user);
 
-    res.cookie("refreshToken", result.refreshToken, {
+    res.cookie(COOKIE_NAMES.REFRESH_TOKEN, result.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
@@ -126,8 +132,10 @@ export const oauthCallback =  async (req, res) => {
      * In frontend redirect to there with access token
      */
 
-    return res.ok({
-        user: req.user,
-        accessToken: result.accessToken
-    });
+    return res.ok(
+        { user: result.user,
+        accessToken: result.accessToken },
+        " OAuth login successfullt.",
+        null
+    );
 };

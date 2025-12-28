@@ -59,7 +59,7 @@ export const authService = {
         await user.save();
 
         return {
-            user: user,
+            user: user.toJSON(),
             accessToken,
             refreshToken
         };
@@ -150,7 +150,7 @@ export const authService = {
      * ---------- OAuth Login by Google -------------------------
      * ----------------------------------------------------------
      */
-    async oauthlogin ({ providerId, email, name }) {
+    async oauthLogin ({ providerId, email, name }) {
         let user = await User.findOne({ email });
 
         if(!user) {
