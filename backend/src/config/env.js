@@ -13,14 +13,15 @@ export const loadEnv = () => {
         // GOOGLE OAUTH LOGIN
         "GOOGLE_CLIENT_ID",
         "GOOGLE_CLIENT_SECRET",
+        "GOOGLE_CALLBACK_URL",
 
         // STREAM VIDEO/AUDIO CALL
         "STREAM_API_KEY",
-        "STREAM_API_SECRET",
+        "STREAM_SECRET_KEY",
 
         // JUDGE0 CODE EXECUTER
-        "JUDGE0_API_URL",
-        "JUDGE0_API_KEY",
+        // "JUDGE0_API_URL",
+        // "JUDGE0_API_KEY",
 
         // INNGEST 
         "INNGEST_EVENT_KEY",
