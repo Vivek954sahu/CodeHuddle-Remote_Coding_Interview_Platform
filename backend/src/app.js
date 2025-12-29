@@ -4,8 +4,11 @@ import helmet from "helmet";
 import morgan from "morgan";
 
 import { logger } from "./utils/logger.js";
-import { errorHandler } from "./middlewares/error.middleware.js";
+import { globalErrHandler } from "./middlewares/error.middleware.js";
 import { responseMiddleware } from "./utils/ApiResponse.js";
+import passport from "./config/passport.js";
+
+import authRoutes from "./modules/auth/auth.routes.js";
 
 const app = express();
 
@@ -19,7 +22,7 @@ app.use(helmet());
 // enabling cors
 app.use(
     cors({
-        origin: [process.env.CLIENT_URL, "http://localhost:5173"],
+        origin: [process.env.CLIENT_URL, "http://localhost:5173", "http://localhost:3000"],
         credentials: true,
     })
 );
@@ -39,6 +42,9 @@ app.use(
     })
 );
 
+// passport initialization
+app.use(passport.initialize());
+
 // Response Middleware
 app.use(responseMiddleware);
 
@@ -57,15 +63,13 @@ app.get("/health", (req, res) => {
 /* --------------------------------------------------------------------------------------------
     =====  Routes =====
 ----------------------------------------------------------------------------------------------*/
-/*  
-app.use("/api/auth",authRoutes);
-*/
+app.use("/api/auth", authRoutes);
 
 /* --------------------------------------------------------------------------------------------
     =====  Route not found (404) =====
 ----------------------------------------------------------------------------------------------*/
 app.use((req, res) => {
-    res.status(200).json({
+    res.status(404).json({
         success: true,
         message: "Resource Not Found",
     });
@@ -74,7 +78,7 @@ app.use((req, res) => {
 /* --------------------------------------------------------------------------------------------
     =====  Global Error Handler =====
 ----------------------------------------------------------------------------------------------*/
-app.use(errorHandler);
+app.use(globalErrHandler);
 
 export default app;
 
