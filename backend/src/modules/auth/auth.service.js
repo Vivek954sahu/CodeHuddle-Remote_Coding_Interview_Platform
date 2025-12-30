@@ -102,18 +102,18 @@ export const authService = {
      *  -------------- Refresh Access Token ------------------
      * ------------------------------------------------------
      */
-    async refreshAccessToken (refreshToken) {
+    async refreshAccessToken (token) {
         let payload;
 
         try {
-            payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+            payload = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
         } catch (error) {
             throw new ApiError(401, "Invalid refresh token");
         }
 
         const user = await User.findById(payload.sub).select("+refreshToken");
 
-        if (!user || user.refreshToken !== refreshToken) {
+        if (!user || user.refreshToken !== token) {
             throw new ApiError(401, "Refresh token revoked");
         }
 

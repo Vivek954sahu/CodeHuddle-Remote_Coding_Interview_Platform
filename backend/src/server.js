@@ -1,11 +1,16 @@
+import { loadEnv } from "./config/env.js";
+// Loading environment variables
+loadEnv();
+
+import{ initPassport } from  "./config/passport.js";
+initPassport();
+
 import http from "http";
 import app from "./app.js";
 import { connectToDB } from "./config/db.js";
-import { loadEnv } from "./config/env.js";
 import { logger } from "./utils/logger.js";
 
-// Loading environment variables
-loadEnv();
+ 
 
 // Create HTTP server
 const server = http.createServer(app);

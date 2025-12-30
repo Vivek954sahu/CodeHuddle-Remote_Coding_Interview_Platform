@@ -13,7 +13,7 @@ export const connectToDB = async () => {
 
     try{
         const conn = await mongoose.connect(process.env.MONGODB_URI, {
-            autoIndex: process.env.NOD_ENV !== "production",
+            autoIndex: process.env.NODE_ENV !== "production",
             maxPoolSize: 10,
             serverSelectionTimeoutMS: 5000,
             socketTimeoutMS: 45000,

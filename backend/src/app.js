@@ -2,11 +2,11 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import passport from "passport";
 
 import { logger } from "./utils/logger.js";
 import { globalErrHandler } from "./middlewares/error.middleware.js";
 import { responseMiddleware } from "./utils/ApiResponse.js";
-import passport from "./config/passport.js";
 
 import authRoutes from "./modules/auth/auth.routes.js";
 
@@ -42,7 +42,7 @@ app.use(
     })
 );
 
-// passport initialization
+// initiate passport
 app.use(passport.initialize());
 
 // Response Middleware

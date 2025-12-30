@@ -1,13 +1,15 @@
 import dotenv from "dotenv";
+import path from "path";
 
 export const loadEnv = () => {
-    dotenv.config();
+    dotenv.config({ path: path.resolve(".env"), quiet: true });
 
     const requiredEnv = [
         "NODE_ENV",
         "PORT",
         "MONGODB_URI",
-        "JWT_SECRET",
+        "JWT_ACCESS_SECRET",
+        "JWT_REFRESH_SECRET",
         "CLIENT_URL",
 
         // GOOGLE OAUTH LOGIN

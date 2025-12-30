@@ -65,13 +65,13 @@ export const login = async (req, res) => {
  * ====================================================================================
  */
 export const refreshToken = async (req, res) => {
-    const refreshToken = req.cookies?.[COOKIE_NAMES.REFRESH_TOKEN];
+    const token = req.cookies?.[COOKIE_NAMES.REFRESH_TOKEN];
 
-    if(!refreshToken) {
+    if(!token) {
         throw new ApiError(401, "Refresh token missing");
     }
 
-    const result = await authService.refreshAccessToken(refreshToken);
+    const result = await authService.refreshAccessToken(token);
 
     res.cookie(COOKIE_NAMES.REFRESH_TOKEN, result.refreshToken, {
         httpOnly: true,
