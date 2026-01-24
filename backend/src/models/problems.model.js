@@ -3,14 +3,7 @@ import mongoose from 'mongoose';
 const { Schema } = mongoose;
 
 const problemSchema = new Schema({
-    createdBy: {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
-        index: true
-    },
-
-    title: {
+   title: {
         type: String,
         required: true,
         trim: true,
@@ -36,36 +29,15 @@ const problemSchema = new Schema({
         index: true
     },
 
-    tags: {
-        type: String,
-        index: true
-    },
-
     supportedLanguages: {
         type: String,
         required: true
-    },
-
-    version: {
-        type: Number,
-        default: 1
     },
 
     isActive: {
         type: Boolean,
         default: true,
         index: true
-    },
-
-    executionConfig: {
-        timeLimitMs: {
-            type: Number,
-            default: 2000
-        },
-        memoryLimitKb: {
-            type: Number,
-            default: 256000
-        }
     },
 
     testcases: [
@@ -95,7 +67,14 @@ const problemSchema = new Schema({
             output: String,
             explanation: String
         }
-    ]
+    ],
+
+     createdBy: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+        index: true
+    }
 },
     {
         timestamps: true,
@@ -109,7 +88,7 @@ problemSchema.index(
 );
 
 // Search optimization
-problemSchema.index({ title: "text", description: "text", tags: "text" });
+problemSchema.index({ title: "text", description: "text" });
 
 
 
