@@ -24,14 +24,6 @@ const interviewProblemSchema = new Schema(
     },
 
     /**
-     * Locked problem version
-     */
-    problemVersion: {
-      type: Number,
-      required: true
-    },
-
-    /**
      * Ordering inside interview
      */
     order: {
@@ -47,7 +39,7 @@ const interviewProblemSchema = new Schema(
     },
 
     /**
-     * Judge0 submissions
+     *  submissions
      */
     submissions: [
       {
@@ -57,8 +49,6 @@ const interviewProblemSchema = new Schema(
         },
         language: String,
         status: String, // ACCEPTED, WA, TLE, RUNTIME_ERROR
-        runtimeMs: Number,
-        memoryKb: Number,
         score: Number,
         submittedAt: {
           type: Date,
@@ -71,33 +61,10 @@ const interviewProblemSchema = new Schema(
      * Final evaluation
      */
     evaluation: {
-      maxScore: {
-        type: Number,
-        default: 100
-      },
       obtainedScore: {
         type: Number,
         default: 0
-      },
-      verdict: {
-        type: String,
-        enum: ["PASS", "FAIL", "PARTIAL"]
       }
-    },
-
-    /**
-     * Interviewer notes for THIS problem
-     */
-    interviewerNotes: {
-      type: String,
-      maxlength: 3000
-    },
-
-    /**
-     * Timeline
-     */
-    codeTimelineUrl: {
-      type: String
     },
 
     /**
@@ -110,7 +77,6 @@ const interviewProblemSchema = new Schema(
   },
   {
     timestamps: true,
-    versionKey: false
   }
 );
 
