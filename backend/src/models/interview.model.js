@@ -24,20 +24,6 @@ const interviewSchema = new Schema({
         required: true
     },
 
-    evaluationTypes: [
-        {
-            type: String,
-            enum: Object.values(EVALUATION_TYPES),
-            required: true
-        }
-    ],
-
-    mode: {
-        type: String,
-        enum: Object.values(INTERVIEW_MODE),
-        default: INTERVIEW_MODE.LIVE
-    },
-
     scheduledAt: {
         type: Date,
         required: true,
@@ -48,11 +34,6 @@ const interviewSchema = new Schema({
         type: Date,
         required: true,
         index: true
-    },
-
-    durationMinutes: {
-        type: Number,
-        default: 60
     },
 
     /**
@@ -79,39 +60,6 @@ const interviewSchema = new Schema({
     editorSessionId: {
         type: String,
         index: true
-    },
-
-    /**
-     * Judge0 execution context
-     */
-    codeExecution: {
-        language: String,
-        submissions: [
-            {
-                submissionId: String,
-                verdict: String,
-                executedAt: Date
-            }
-        ]
-    },
-
-    /**
-     * Result & feedback
-     */
-    result: {
-        score: {
-            type: Number,
-            min: 0,
-            max: 100
-        },
-        decision: {
-            type: String,
-            enum: ["PASS", "FAIL", "HOLD"]
-        },
-        interviewerNotes: {
-            type: String,
-            maxlength: 5000
-        }
     },
 
     /**
