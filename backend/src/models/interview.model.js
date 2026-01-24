@@ -29,6 +29,8 @@ const interviewSchema = new Schema({
         required: true,
         index: true
     },
+    
+    durationMinutes: { type: Number, default: 60 },
 
     endAt: {
         type: Date,
