@@ -21,8 +21,6 @@ export const interviewService = {
         candidate: payload.candidateId,
         interviewer: payload.interviewerId,
         interviewType: payload.type,
-        evaluationTypes: payload.evaluationTypes,
-        mode: payload.mode,
         scheduledAt: payload.scheduledAt,
         endAt,
         durationMinutes: payload.duration,

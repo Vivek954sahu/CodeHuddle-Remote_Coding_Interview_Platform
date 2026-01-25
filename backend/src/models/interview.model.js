@@ -29,7 +29,7 @@ const interviewSchema = new Schema({
         required: true,
         index: true
     },
-    
+
     durationMinutes: { type: Number, default: 60 },
 
     endAt: {
@@ -44,7 +44,7 @@ const interviewSchema = new Schema({
     status: {
         type: String,
         enum: Object.values(INTERVIEW_STATUS),
-        default: "SCHEDULED",
+        default: "DRAFT",
         index: true
     },
 

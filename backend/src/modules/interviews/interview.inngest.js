@@ -2,6 +2,7 @@ import { step } from "inngest";
 import { inngest } from "../../config/inngest.js";
 import { Problem } from "../../models/problems.model.js";
 import { InterviewProblem } from "../../models/interviewProblem.model.js";
+import { Interview } from "../../models/interview.model.js";
 
 
 export const mapInterviewProblems = inngest.createFunction(
@@ -23,8 +24,16 @@ export const mapInterviewProblems = inngest.createFunction(
                 problem: problem._id,
                 order: idx + 1
             }));
-            
+
             await InterviewProblem.insertMany(mappings);
+
+        });
+
+        /** Marking Interview to SCHEDULED */
+        await step.run("mark-interview-scheduled", async () => {
+            await Interview.findByIdAndUpdate(interviewId, {
+                status: "SCHEDULED"
+            });
         });
 
         return { success: true };

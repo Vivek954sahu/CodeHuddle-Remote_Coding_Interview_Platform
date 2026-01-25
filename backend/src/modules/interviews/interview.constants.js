@@ -32,16 +32,21 @@ export const INTERVIEW_TYPES = Object.freeze({
     HR: "HR"
 });
 
+// export const INTERVIEW_MODE = Object.freeze({
+//     LIVE: "LIVE",
+//     ASYNC: "ASYNC"
+// });
+
 /**
  * -------   Evaluation types --------
  */
-export const EVALUATION_TYPES = Object.freeze({
-    CODING: "CODING",
-    SYSTEM_DESIGN: "SYSTEM_DESIGN",
-    DSA: "DSA",
-    CS_FUNDAMENTALS: "CS_FUNDAMENTALS",
-    BEHAVIORAL: "BEHAVIORAL"
-});
+// export const EVALUATION_TYPES = Object.freeze({
+//     CODING: "CODING",
+//     SYSTEM_DESIGN: "SYSTEM_DESIGN",
+//     DSA: "DSA",
+//     CS_FUNDAMENTALS: "CS_FUNDAMENTALS",
+//     BEHAVIORAL: "BEHAVIORAL"
+// });
 
 /**
  * -------    Interview permissions ------
