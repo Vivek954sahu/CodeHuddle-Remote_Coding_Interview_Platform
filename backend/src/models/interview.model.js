@@ -3,7 +3,60 @@ import { EVALUATION_TYPES, INTERVIEW_MODE, INTERVIEW_STATUS, INTERVIEW_TYPES } f
 
 const { Schema } = mongoose;
 
+const interviewProblemSchema = new Schema({
+    problem: {
+        type: Schema.Types.ObjectId,
+        ref: "Problem",
+        required: true,
+        index: true
+    },
+
+    /**
+     * Ordering inside interview
+     */
+    order: {
+        type: Number,
+        default: 1
+    },
+
+    submission: {
+        submissionId: {
+            type: String,
+            required: true
+        },
+        language: String,
+        status: String, // ACCEPTED, WA, TLE, RUNTIME_ERROR
+        score: Number,
+        submittedAt: {
+            type: Date,
+            default: Date.now
+        }
+    },
+
+    /**
+     * Final evaluation
+     */
+    evaluation: {
+        obtainedScore: {
+            type: Number,
+            default: 0
+        }
+    },
+
+    /**
+     * Audit
+     */
+    assignedAt: {
+        type: Date,
+        default: Date.now
+    }
+}, { _id: false }
+);
+
 const interviewSchema = new Schema({
+
+    title: { type: String, required: true },
+
     candidate: {
         type: Schema.Types.ObjectId,
         ref: "User",
@@ -24,19 +77,9 @@ const interviewSchema = new Schema({
         required: true
     },
 
-    scheduledAt: {
-        type: Date,
-        required: true,
-        index: true
-    },
-
+    scheduledAt: { type: Date, required: true, index: true },
     durationMinutes: { type: Number, default: 60 },
-
-    endAt: {
-        type: Date,
-        required: true,
-        index: true
-    },
+    endAt: { type: Date, required: true, index: true },
 
     /**
      * Interview lifecycle
@@ -49,20 +92,22 @@ const interviewSchema = new Schema({
     },
 
     /**
+     * Embedded Problems
+     */
+    problems: {
+        type: [interviewProblemSchema],
+        default: []
+    },
+
+    /**
      * Stream session
      */
-    streamSession: {
-        callId: String,
-        channelId: String
-    },
+    streamSession: { callId: String, channelId: String },
 
     /**
      * Collaborative editor session (Yjs / Monaco)
      */
-    editorSessionId: {
-        type: String,
-        index: true
-    },
+    editorSessionId: { type: String },
 
     /**
      * Audit
@@ -94,6 +139,12 @@ interviewSchema.index(
 // Fast dashboard queries
 interviewSchema.index({ candidate: 1, status: 1 });
 interviewSchema.index({ interviewer: 1, status: 1 });
+
+// Ensure problem appears only once per interview
+interviewSchema.index(
+  { _id: 1, "problems.problemId": 1 },
+  { unique: true }
+);
 
 /**
  * ===========================
