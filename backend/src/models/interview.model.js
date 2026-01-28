@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { EVALUATION_TYPES, INTERVIEW_MODE, INTERVIEW_STATUS, INTERVIEW_TYPES } from "../modules/interviews/interview.constants.js";
+import { INTERVIEW_STATUS, INTERVIEW_TYPES } from "../modules/interviews/interview.constants.js";
 
 const { Schema } = mongoose;
 
@@ -87,7 +87,7 @@ const interviewSchema = new Schema({
     status: {
         type: String,
         enum: Object.values(INTERVIEW_STATUS),
-        default: "DRAFT",
+        default: "SCHEDULED",
         index: true
     },
 
@@ -102,7 +102,9 @@ const interviewSchema = new Schema({
     /**
      * Stream session
      */
-    streamSession: { callId: String, channelId: String },
+    callId: {
+        type: String
+    },
 
     /**
      * Collaborative editor session (Yjs / Monaco)
