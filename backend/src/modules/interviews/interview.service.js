@@ -65,7 +65,7 @@ export const interviewService = {
         const channel = chatClient.channel("messaging", callId, {
             name:`${payload.title}_session` ,
             created_by_id: payload.createdBy,
-            members: [payload.interviewerId]
+            members: [{ user_id: payload.interviewerId, role: "interviewer" }]
         });
 
         await channel.create();
@@ -82,6 +82,60 @@ export const interviewService = {
      *       Get Upcoming /Active Session
      * =========================================
      */
-    
+    async upcomingOrActiveInterviews(userId, role, options = {}) {
+        const { page = 1, limit = 8 } = options;
+
+        const now = new Date();
+
+        const searchQuery = {
+            scheduledAt: { $gte: now },
+            status: {
+                $in: ['SCHEDULED', 'IN_PROGRESS']
+            }
+        };
+
+        if (role === 'candidate') {
+            searchQuery.candidate = userId;
+        } else if (role === 'interviewer') {
+            searchQuery.interviewer = userId;
+        }
+
+        const skip = (page - 1) * limit;
+
+        const [interviews, total] = await Promise.all([
+            Interview.find(searchQuery)
+                .populate("candidate", "name email")
+                .populate("interviewer", "name email")
+                .populate({
+                    path: "problems.problem",
+                    select: "title"
+                })
+                .sort({ scheduledAt: 1 })
+                .skip(skip)
+                .limit(limit)
+                .lean(),
+
+            Interview.countDocuments(searchQuery)
+        ]);
+
+       if (role === "candidate") {
+        const result = interviews.map(interview => {
+            delete interview.candidate,
+            delete interview.problems
+        });
+       } else {
+        const result = interviews.map(interview => {
+            delete interview.interviewer
+        });
+       };
+
+       return {
+        result,
+        total,
+        limit,
+        skip,
+        hasMore: skip + limit < total
+       };
+    },
 
 };
