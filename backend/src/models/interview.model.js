@@ -34,16 +34,6 @@ const interviewProblemSchema = new Schema({
     },
 
     /**
-     * Final evaluation
-     */
-    evaluation: {
-        obtainedScore: {
-            type: Number,
-            default: 0
-        }
-    },
-
-    /**
      * Audit
      */
     assignedAt: {
@@ -99,6 +89,17 @@ const interviewSchema = new Schema({
         default: []
     },
 
+    
+    /**
+     * Final evaluation
+     */
+    evaluation: {
+        obtainedScore: {
+            type: Number,
+            default: 0
+        }
+    },
+    
     /**
      * Stream session
      */
