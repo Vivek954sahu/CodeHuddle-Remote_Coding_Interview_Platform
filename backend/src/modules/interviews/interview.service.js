@@ -5,11 +5,14 @@ import { ApiError } from "../../utils/ApiError.js";
 
 
 export const interviewService = {
+
     /**
- * =======================================
- *        Create Interview Session
- * =======================================
- */
+     * =======================================
+     *        Create Interview Session
+     * =======================================
+     * @param { object } payload 
+     * @returns { interviewId, status }
+     */
     async scheduleInterview(payload) {
 
         /** Fetching CandidateId for Interview Creation */
@@ -63,7 +66,7 @@ export const interviewService = {
          * Creating a chat message channel
          */
         const channel = chatClient.channel("messaging", callId, {
-            name:`${payload.title}_session` ,
+            name: `${payload.title}_session`,
             created_by_id: payload.createdBy,
             members: [{ user_id: payload.interviewerId, role: "interviewer" }]
         });
@@ -81,14 +84,15 @@ export const interviewService = {
      * =========================================
      *       Get Upcoming /Active Session
      * =========================================
+     * @param { uuid } userId 
+     * @param { String } role 
+     * @param { page, limit } options 
+     * @returns { interviews , total, limit, skip, hsMore }
      */
     async upcomingOrActiveInterviews(userId, role, options = {}) {
         const { page = 1, limit = 8 } = options;
 
-        const now = new Date();
-
         const searchQuery = {
-            scheduledAt: { $gte: now },
             status: {
                 $in: ['SCHEDULED', 'IN_PROGRESS']
             }
@@ -118,24 +122,182 @@ export const interviewService = {
             Interview.countDocuments(searchQuery)
         ]);
 
-       if (role === "candidate") {
-        const result = interviews.map(interview => {
-            delete interview.candidate,
-            delete interview.problems
-        });
-       } else {
-        const result = interviews.map(interview => {
-            delete interview.interviewer
-        });
-       };
+        const result = null;
 
-       return {
-        result,
-        total,
-        limit,
-        skip,
-        hasMore: skip + limit < total
-       };
+        if (role === "candidate") {
+            result = interviews.map(interview => {
+                delete interview.candidate,
+                    delete interview.problems
+            });
+        } else {
+            result = interviews.map(interview => {
+                delete interview.interviewer
+            });
+        };
+
+        return {
+            result,
+            total,
+            limit,
+            skip,
+            hasMore: skip + limit < total
+        };
     },
 
+    /**
+     * =========================================
+     *           Get Past Session
+     * =========================================
+     * @param { uuid } userId
+     * @param { String } role 
+     * @param { page, limit } options 
+     * @returns { interviews, total, limit, skip, hasMore }
+     */
+    async pastInterviews(userId, role, options = {}) {
+        const { page = 1, limit = 8 } = options;
+
+        const searchQuery = {
+            status: {
+                $in: ["COMPLETED", "CANCELLED", "NO_SHOW", "EXPIRED"]
+            },
+            $or: [{ interviewer: userId }, { candidate: userId }]
+        }
+
+        const skip = (page - 1) * limit;
+
+        const [interviews, total] = await Promise.all([
+            Interview.find(searchQuery, { title: 1, candidate: 1, interviewer: 1, scheduledAt: 1, endAt: 1, status: 1, evaluation: 1 })
+                .populate("candidate", "name")
+                .populate("interviewer", "name")
+                .sort({ scheduledAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .lean(),
+
+            Interview.countDocuments(searchQuery)
+        ]);
+
+        const result = null;
+
+        if (role === "candidate") {
+            result = interviews.map(interview => {
+                delete interview.candidate
+            });
+        } else {
+            result = interviews.map(interview => {
+                delete interview.interviewer
+            });
+        };
+
+        return {
+            result,
+            total,
+            limit,
+            skip,
+            hasMore: skip + limit < total
+        };
+    },
+
+    /**
+     * ==========================================
+     *           Join Interview Session
+     * ==========================================
+     * @param { uuid } userId 
+     * @param { uuid } interviewId 
+     * @returns { interviewId, callId, status}
+     */
+    async joinInterview(userId, interviewId) {
+
+        // Fetch interview 
+        const interview = await Interview.findById(interviewId);
+
+        if (!interview) throw new ApiError(404, "Interview not found");
+
+        // Check user is part of the interview
+        const isCandidate = interview.candidate && interview.candidate.toString() === userId.toString();
+        const isInterviewer = interview.interviewer && interview.interviewer.toString() === userId.toString();
+
+        if (!isCandidate && !isInterviewer) {
+            throw new ApiError(403, "User is not a participant of this interview");
+        }
+
+        // If interview is scheduled and candidate joins, mark it as IN_PROGRESS
+        if (isCandidate && interview.canStart()) {
+            try {
+                interview.start();
+                await interview.save();
+            } catch (err) {
+                throw new ApiError(400, err.message || "Unable to start interview");
+            }
+        }
+
+        if (isCandidate) {
+            // Ensure chat channel has the participant as member.
+            try {
+                const channel = chatClient.channel("messaging", interview.callId);
+
+                // Add member to channel
+                await channel.addMembers([{ userId: userId, role: "candidate" }])
+            } catch (err) {
+                console.log(err.message);
+            }
+        }
+
+        return {
+            interviewId: interview._id,
+            callId: interview.callId,
+            status: interview.status
+        };
+
+    },
+
+    /**
+     * ==========================================
+     *           End Interview Session
+     * ==========================================
+     * @param { uuid } userId 
+     * @param { uuid } interviewId 
+     * @returns { interviewId, callId, status}
+     */
+    async endInterview(userId, interviewId) {
+        // Fetch interview
+        const interview = await Interview.findById(interviewId);
+
+        if (!interview) throw new ApiError(404, "Interview not found");
+
+        // Check user is part of the interview
+        const isCandidate = interview.candidate && interview.candidate.toString() === userId.toString();
+        const isInterviewer = interview.interviewer && interview.interviewer.toString() === userId.toString();
+
+        if (!isCandidate && !isInterviewer) {
+            throw new ApiError(403, "User is not a participant of this interview");
+        };
+
+        if (isCandidate) throw new ApiError(403, "Only interviewer can end session.");
+
+        // If interview is IN_PROGRESS and interviewer ends session, mark it as COMPLETED
+        if (isInterviewer && interview.canComplete()) {
+            try {
+                // Delete Video call
+                const call = streamClient.video.call("default", interview.callId);
+                await call.delete({ hard: true });
+
+                // Delete Chat channel
+                const channel = chatClient.channel("messaging", interview.callId);
+                await channel.delete(); 
+
+                // Complete the Interview
+                interview.complete();
+                await interview.save();
+            } catch (err) {
+                throw new ApiError(400, err.message || "Unable to end the interview");
+            }
+        };
+
+        return {
+            interviewId: interview._id,
+            callId: interview.callId,
+            status: interview.status
+        };
+    }
 };
