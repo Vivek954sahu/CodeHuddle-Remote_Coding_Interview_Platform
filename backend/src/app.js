@@ -11,6 +11,8 @@ import { responseMiddleware } from "./utils/ApiResponse.js";
 import { inngest, functions } from "./config/inngest.js";
 
 import authRoutes from "./modules/auth/auth.routes.js";
+import interviewRoutes from "./modules/interviews/interview.routes.js";
+import problemRoutes from "./modules/problems/problem.routes.js";
 
 const app = express();
 
@@ -67,7 +69,9 @@ app.get("/health", (req, res) => {
 ----------------------------------------------------------------------------------------------*/
 app.use("/api/inngest", serve({ client: inngest, functions }));
 
-app.use("/api/auth", authRoutes);
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/interviews", interviewRoutes);
+app.use("/api/v1/problems", problemRoutes);
 
 /* --------------------------------------------------------------------------------------------
     =====  Route not found (404) =====
