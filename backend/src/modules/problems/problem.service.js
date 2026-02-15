@@ -13,7 +13,6 @@ export const problemService = {
             description: payload.description,
             difficulty: payload.difficulty,
             supportedLanguages: payload.supportedLanguages,
-            isActive: payload.isActive,
             testcases: payload.testcases,
             samples: payload.samples,
             createdBy: userId
