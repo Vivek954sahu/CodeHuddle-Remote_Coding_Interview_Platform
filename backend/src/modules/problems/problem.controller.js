@@ -1,5 +1,5 @@
-import { problemService } from "./problem.service";
-import { problemSchema } from "./problem.validation";
+import { problemService } from "./problem.service.js";
+import { problemSchema } from "./problem.validation.js";
 
 /**
  * ===========================================================

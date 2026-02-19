@@ -1,6 +1,6 @@
 import { Inngest } from 'inngest';
-import { connectToDB } from './db';
-import { deleteStreamUser } from './stream';
+import { connectToDB } from './db.js';
+import { deleteStreamUser } from './stream.js';
 
 
 export const inngest = new Inngest({ id: "codehuddle" });

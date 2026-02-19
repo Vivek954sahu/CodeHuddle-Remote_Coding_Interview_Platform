@@ -1,5 +1,5 @@
-import { interviewService } from "./interview.service";
-import { interviewSchema, queryInterviewSchema, urlInterviewSchema } from "./interview.validation";
+import { interviewService } from "./interview.service.js";
+import { interviewSchema, queryInterviewSchema, urlInterviewSchema } from "./interview.validation.js";
 
 /**
  * ================================================================
