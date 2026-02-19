@@ -1,7 +1,10 @@
+import dotenv from "dotenv";
+import path from "path";
 import { StreamChat } from "stream-chat";
 import { StreamClient } from  "@stream-io/node-sdk";
 import { logger } from "../utils/logger.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+dotenv.config({ path: path.resolve(".env"), quiet: true });
 
 const apiKey = process.env.STREAM_API_KEY;
 const apiSecret = process.env.STREAM_SECRET_KEY;

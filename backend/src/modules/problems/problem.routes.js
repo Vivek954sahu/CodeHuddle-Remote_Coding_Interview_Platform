@@ -3,6 +3,7 @@ import { authenticate } from "../../middlewares/auth.middleware.js";
 import { USER_ROLES } from "../auth/auth.constants.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { addProblem } from "./problem.controller.js";
+import { authorize } from "../../middlewares/rbac.middleware.js";
 
 const router = express.Router();
 
