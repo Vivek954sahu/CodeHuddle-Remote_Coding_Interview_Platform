@@ -58,6 +58,14 @@ export const authService = {
 
         await user.save();
 
+        await inngest.send({
+            name: "user/created-logged-in",
+            data: {
+                id: user._id,
+                name: user.name
+            },
+        }).catch(err => next(err));
+
         return {
             user: user.toJSON(),
             accessToken,
@@ -91,6 +99,14 @@ export const authService = {
 
         await user.save();
 
+        await inngest.send({
+            name: "user/created-logged-in",
+            data: {
+                id: user._id,
+                name: user.name
+            },
+        }).catch(err => next(err));
+
         return {
             user: user.toJSON(),
             accessToken,
@@ -102,7 +118,7 @@ export const authService = {
      *  -------------- Refresh Access Token ------------------
      * ------------------------------------------------------
      */
-    async refreshAccessToken (token) {
+    async refreshAccessToken(token) {
         let payload;
 
         try {
@@ -137,9 +153,9 @@ export const authService = {
      * ------------------ Logout User ------------------------
      * -------------------------------------------------------
      */
-    async logout (refreshToken) {
-        if(!refreshToken) return;
-        
+    async logout(refreshToken) {
+        if (!refreshToken) return;
+
         await User.updateOne(
             { refreshToken: refreshToken },
             { $set: { refreshToken: null } }
@@ -150,10 +166,10 @@ export const authService = {
      * ---------- OAuth Login by Google -------------------------
      * ----------------------------------------------------------
      */
-    async oauthLogin ({ providerId, email, name }) {
+    async oauthLogin({ providerId, email, name }) {
         let user = await User.findOne({ email });
 
-        if(!user) {
+        if (!user) {
             user = await User.create({
                 name,
                 email,
@@ -179,5 +195,5 @@ export const authService = {
             refreshToken
         };
     }
-    
+
 }
