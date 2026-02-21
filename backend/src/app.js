@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import passport from "passport";
+import path from "path";
 import { serve } from "inngest/express";
 
 import { logger } from "./utils/logger.js";
@@ -15,6 +16,8 @@ import interviewRoutes from "./modules/interviews/interview.routes.js";
 import problemRoutes from "./modules/problems/problem.routes.js";
 
 const app = express();
+
+const __dirname = path.resolve();
 
 /* --------------------------------------------------------------------------------------------
     =====  Global Middlewares =====
@@ -32,7 +35,7 @@ app.use(
 );
 
 // JSON body parser
-app.use(express.json({ limit: "2mb"} ));
+app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 // HTTP request logging
@@ -73,13 +76,27 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/interviews", interviewRoutes);
 app.use("/api/v1/problems", problemRoutes);
 
+/**
+ * ---------------------------------------------------------------------------------------------
+ *                          Make ready for deployment
+ * ---------------------------------------------------------------------------------------------
+ */
+if (process.env.NODE_ENV === "production") {
+    app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
+    app.get("/{*any}", (req, res) => {
+        console.log(__dirname)
+        res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
+    });
+};
+
 /* --------------------------------------------------------------------------------------------
     =====  Route not found (404) =====
 ----------------------------------------------------------------------------------------------*/
-app.use((req, res) => {
+app.use("/api", (req, res) => {
     res.status(404).json({
-        success: true,
-        message: "Resource Not Found",
+        success: false,
+        message: "API Route not found",
     });
 });
 
