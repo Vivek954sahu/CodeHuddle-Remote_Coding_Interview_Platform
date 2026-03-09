@@ -11,7 +11,7 @@ import ProtectedRoute from "../routes/ProtectedRoute";
 import RoleRoute from "../routes/RoleRoute";
 import Login from "../pages/auth/Login";
 import SignUp from "../pages/auth/SignUp";
-import InterviewerDashBoard from "../pages/dashboards/InterviewerDashBoard";
+import InterviewerDashboard from "../pages/dashboards/InterviewerDashboard";
 
 
 export const router = createBrowserRouter([
@@ -40,7 +40,7 @@ export const router = createBrowserRouter([
                 children: [
                     {
                         path: "/interviewer/dashboard",
-                        element: <InterviewerDashBoard />,
+                        element: <InterviewerDashboard />,
                     }
                 ],
             },
