@@ -2,7 +2,6 @@ import { createBrowserRouter } from "react-router";
 
 import LandingPage from "../pages/LandingPage";
 
-
 import CandidateDashboard from "../pages/dashboards/CandidateDashboard";
 import AdminDashboard from "../pages/dashboards/AdminDashboard";
 
@@ -12,7 +11,8 @@ import ProtectedRoute from "../routes/ProtectedRoute";
 import RoleRoute from "../routes/RoleRoute";
 import Login from "../pages/auth/Login";
 import SignUp from "../pages/auth/SignUp";
-import InterviewerDashboard from "../pages/dashboards/InterviewerDashBoard";
+import InterviewerDashBoard from "../pages/dashboards/InterviewerDashBoard";
+
 
 export const router = createBrowserRouter([
     {
@@ -40,7 +40,7 @@ export const router = createBrowserRouter([
                 children: [
                     {
                         path: "/interviewer/dashboard",
-                        element: <InterviewerDashboard />,
+                        element: <InterviewerDashBoard />,
                     }
                 ],
             },
