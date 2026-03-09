@@ -1,5 +1,5 @@
 
-const InterviewerDashBoard = () => {
+const InterviewerDashboard = () => {
   return (
     <div>
       Interviewer Dashboard
@@ -7,4 +7,4 @@ const InterviewerDashBoard = () => {
   )
 }
 
-export default InterviewerDashBoard
+export default InterviewerDashboard
