@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { ApiError } from "../../utils/ApiError.js";
 import { User } from "../../models/user.model.js";
 import { JWT_EXPIRY, USER_ROLES } from "./auth.constants.js";
+import { inngest } from "../../config/inngest.js";
 
 /**
  * =============================================================
@@ -58,7 +59,7 @@ export const authService = {
 
         await user.save();
 
-        await inngest.send({
+        inngest.send({
             name: "user/created-logged-in",
             data: {
                 id: user._id,
@@ -99,7 +100,7 @@ export const authService = {
 
         await user.save();
 
-        await inngest.send({
+        inngest.send({
             name: "user/created-logged-in",
             data: {
                 id: user._id,
