@@ -104,10 +104,17 @@ export const interviewService = {
             searchQuery.interviewer = userId;
         }
 
+        const projection =
+            role === 'interviewer'
+             ? {
+                _id:1, title:1, status:1, interviewType:1, candidate:1, scheduledAt:1, durationMinutes:1, problems:1, callId:1, interviewer:0
+            } : {
+                _id:1, title:1, status:1, interviewType:1, interviewer:1, scheduledAt:1, durationMinutes:1, problems:0, candidate:0, callId:1
+            };
         const skip = (page - 1) * limit;
 
         const [interviews, total] = await Promise.all([
-            Interview.find(searchQuery)
+            Interview.find(searchQuery, projection)
                 .populate("candidate", "name email")
                 .populate("interviewer", "name email")
                 .populate({
@@ -122,21 +129,8 @@ export const interviewService = {
             Interview.countDocuments(searchQuery)
         ]);
 
-        const result = null;
-
-        if (role === "candidate") {
-            result = interviews.map(interview => {
-                delete interview.candidate,
-                    delete interview.problems
-            });
-        } else {
-            result = interviews.map(interview => {
-                delete interview.interviewer
-            });
-        };
-
         return {
-            result,
+            result: interviews,
             total,
             limit,
             skip,
@@ -284,7 +278,7 @@ export const interviewService = {
 
                 // Delete Chat channel
                 const channel = chatClient.channel("messaging", interview.callId);
-                await channel.delete(); 
+                await channel.delete();
 
                 // Complete the Interview
                 interview.complete();

@@ -145,7 +145,7 @@ interviewSchema.index({ interviewer: 1, status: 1 });
 
 // Ensure problem appears only once per interview
 interviewSchema.index(
-  { _id: 1, "problems.problemId": 1 },
+  { _id: 1, "problems.problem": 1 },
   { unique: true }
 );
 
