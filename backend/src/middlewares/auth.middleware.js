@@ -21,7 +21,7 @@ export const authenticate = asyncHandler(async (req, res, next) => {
     try {
         payload = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
     } catch (error) {
-        throw Api.unauthorized("Invalid or expired token");
+        throw ApiError.unauthorized("Invalid or expired token");
     }
 
     req.user = {
