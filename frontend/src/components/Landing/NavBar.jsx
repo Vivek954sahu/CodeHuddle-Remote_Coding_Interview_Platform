@@ -4,7 +4,7 @@ import { Link } from "react-router";
 
 
 const NavBar = () => {
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, user } = useAuth();
 
   return (
     <header className="border-b border-purple-400 bg-purple-50 shadow-sm">
@@ -20,7 +20,7 @@ const NavBar = () => {
                 <div className="flex items-center space-x-4">
                     { isAuthenticated ? (
                         <button className="h-10 px-4 py-2 inline-flex items-center justify-center whitespace-nowrap rounded-md font-medium text-sm bg-purple-600 hover:bg-purple-500/70">
-                            <Link to="/dashboard">Go to Dashboard</Link>
+                            <Link to={user.role === "interviewer" ? "/interviewer/dashboard" : "/candidate/dahsboard"}>Go to Dashboard</Link>
                         </button>
                     ) : (
                         <>
