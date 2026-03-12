@@ -12,6 +12,8 @@ import RoleRoute from "../routes/RoleRoute";
 import Login from "../pages/auth/Login";
 import SignUp from "../pages/auth/SignUp";
 import InterviewerDashboard from "../pages/dashboards/InterviewerDashboard";
+import NotFound from "../pages/NotFound";
+
 
 
 export const router = createBrowserRouter([
@@ -75,5 +77,10 @@ export const router = createBrowserRouter([
                 ],
             }
         ],
-    }
+    },
+
+    {
+        path: "/*",
+        element: <NotFound />
+    },
 ]);
