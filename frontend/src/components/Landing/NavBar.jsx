@@ -7,7 +7,7 @@ const NavBar = () => {
     const { isAuthenticated, user } = useAuth();
 
   return (
-    <header className="border-b border-purple-400 bg-purple-50 shadow-sm">
+    <header className="border-b border-purple-400 bg-purple-50 shadow-sm rounded-md">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
             {/* Logo */}
             <div className="flex items-center space-x-2">
@@ -19,8 +19,8 @@ const NavBar = () => {
             <nav>
                 <div className="flex items-center space-x-4">
                     { isAuthenticated ? (
-                        <button className="h-10 px-4 py-2 inline-flex items-center justify-center whitespace-nowrap rounded-md font-medium text-sm bg-purple-600 hover:bg-purple-500/70">
-                            <Link to={user.role === "interviewer" ? "/interviewer/dashboard" : "/candidate/dahsboard"}>Go to Dashboard</Link>
+                        <button className="h-10 px-4 py-2 inline-flex items-center justify-center whitespace-nowrap rounded-md font-medium text-sm text-white bg-purple-600 hover:bg-purple-500/70">
+                            <Link to={user.role === "interviewer" ? "/interviewer/dashboard" : "/candidate/dashboard"}>Go to Dashboard</Link>
                         </button>
                     ) : (
                         <>
