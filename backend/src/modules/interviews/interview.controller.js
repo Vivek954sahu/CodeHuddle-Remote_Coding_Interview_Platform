@@ -1,3 +1,4 @@
+import { ApiError } from "../../utils/ApiError.js";
 import { interviewService } from "./interview.service.js";
 import { interviewSchema, queryInterviewSchema, urlInterviewSchema } from "./interview.validation.js";
 
@@ -10,7 +11,7 @@ export const scheduleInterview = async (req, res) => {
     const { error, value } = interviewSchema.validate(req.body);
 
     if (error) {
-        throw ApiError.badRequest("Missing or Incorrect required fields", error);
+        throw ApiError.badRequest(`Missing or Incorrect required fields. ${error.message}`, error);
     };
 
     const createdBy = req.user.id;
@@ -77,6 +78,25 @@ export const getPastInterviews = async (req, res) => {
 
 /**
  * ================================================================
+ *                   Get Interview By ID
+ * ================================================================
+ */
+export const getInterviewById = async (req, res) => {
+    const { error, value } = urlInterviewSchema.validate(req.params);
+
+    if (error) {
+        throw ApiError.badRequest(`Missing required fields. ${error.message}`, error);
+    };
+    
+    const interviewId = value.interviewId;
+
+    const result = await interviewService.interviewById(interviewId);
+
+    res.ok(result, "Interview details Fetched Succesfully.");
+};
+
+/**
+ * ================================================================
  *                   Join Interview
  * ================================================================
  */
@@ -115,4 +135,18 @@ export const endInterview = async (req, res) => {
     const result = await interviewService.endInterview(userId, interviewId);
 
     res.ok(result, " Interview Ended Succesfully.");
+};
+
+/**
+ * =================================================================
+ *                  Get Stream Token
+ * ================================================================
+ */
+export const getStreamToken =  async (req, res) => {
+    const userId = req.user.id;
+
+    const result = await interviewService.streamToken(userId);
+
+    res.ok(result, " Stream Token fetched Succesfully.");
+
 };

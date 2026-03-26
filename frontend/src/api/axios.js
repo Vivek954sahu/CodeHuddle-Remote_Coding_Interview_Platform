@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const Axios = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
+    baseURL: "http://localhost:3000/api/",
     withCredentials: true
 });
 
@@ -20,8 +20,15 @@ Axios.interceptors.response.use(
     (response) => response,
 
     async (error) => {
-
         const originalRequest = error.config;
+
+        // if the failure happened during a refresh attempt, bail out and log out
+        if (originalRequest?.url?.includes("/v1/auth/refresh")) {
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("user");
+            window.location.href = "/login";
+            return Promise.reject(error);
+        }
 
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
@@ -33,16 +40,12 @@ Axios.interceptors.response.use(
                 const newAccessToken = res.data.accessToken;
 
                 localStorage.setItem("accessToken", newAccessToken);
-
                 originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
                 return Axios(originalRequest);
-
             } catch (refreshError) {
-
                 localStorage.removeItem("accessToken");
                 localStorage.removeItem("user");
-
                 window.location.href = "/login";
             }
         }

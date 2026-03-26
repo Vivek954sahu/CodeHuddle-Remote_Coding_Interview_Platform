@@ -1,5 +1,6 @@
 import { chatClient, streamClient } from "../../config/stream.js";
 import { Interview } from "../../models/interview.model.js";
+import { User } from "../../models/user.model.js";
 import { ApiError } from "../../utils/ApiError.js";
 
 
@@ -16,11 +17,11 @@ export const interviewService = {
     async scheduleInterview(payload) {
 
         /** Fetching CandidateId for Interview Creation */
-        const candidate = await Interview.findOne({ email: payload.candidateEmail }).select('_id').lean();
+        const candidate = await User.findOne({ email: payload.value.candidateEmail }).select('_id').lean();
 
         if (!candidate) throw new ApiError(400, "Candidate does not exists!");
 
-        const endAt = new Date(payload.scheduledAt.getTime() + (payload.duration * 60000));
+        const endAt = new Date(payload.value.scheduledAt.getTime() + (payload.value.duration * 60000));
 
         /**
          * Generate a unique call Id for stream video calls
@@ -30,7 +31,7 @@ export const interviewService = {
         /**
          * Creating problem-mapping array
          */
-        const interviewProblems = payload.problemIds.map((p, idx) => ({
+        const interviewProblems = payload.value.problemIds.map((p, idx) => ({
             problem: p,
             order: idx + 1
         }));
@@ -39,13 +40,13 @@ export const interviewService = {
          * Creating  Interview
          */
         const interview = await Interview.create({
-            title: payload.title,
+            title: payload.value.title,
             candidate: candidate._id,
-            interviewer: payload.interviewerId,
-            interviewType: payload.type,
-            scheduledAt: payload.scheduledAt,
+            interviewer: payload.createdBy,
+            interviewType: payload.value.type,
+            scheduledAt: payload.value.scheduledAt,
             endAt: endAt,
-            durationMinutes: payload.duration,
+            durationMinutes: payload.value.duration,
             createdBy: payload.createdBy,
             callId: callId,
             problems: interviewProblems
@@ -58,7 +59,7 @@ export const interviewService = {
             data: {
                 created_by_id: payload.createdBy,
                 custom: { sessionId: interview._id.toString() },
-                starts_at: payload.scheduledAt
+                starts_at: payload.value.scheduledAt
             },
         });
 
@@ -66,9 +67,9 @@ export const interviewService = {
          * Creating a chat message channel
          */
         const channel = chatClient.channel("messaging", callId, {
-            name: `${payload.title}_session`,
+            name: `${payload.value.title}_session`,
             created_by_id: payload.createdBy,
-            members: [{ user_id: payload.interviewerId, role: "interviewer" }]
+            members: [{ user_id: payload.createdBy, role: "interviewer" }]
         });
 
         await channel.create();
@@ -95,6 +96,9 @@ export const interviewService = {
         const searchQuery = {
             status: {
                 $in: ['SCHEDULED', 'IN_PROGRESS']
+            },
+            scheduledAt: {
+                $gte: new Date()
             }
         };
 
@@ -104,16 +108,33 @@ export const interviewService = {
             searchQuery.interviewer = userId;
         }
 
+        const projection =
+            role === 'interviewer'
+                ? {
+                    _id: 1, title: 1, status: 1, interviewType: 1, candidate: 1, scheduledAt: 1, durationMinutes: 1, problems: 1, callId: 1
+                } : {
+                    _id: 1, title: 1, status: 1, interviewType: 1, interviewer: 1, scheduledAt: 1, durationMinutes: 1, callId: 1
+                };
+
         const skip = (page - 1) * limit;
 
-        const [interviews, total] = await Promise.all([
-            Interview.find(searchQuery)
+        let finedInterviewsQuery = Interview.find(searchQuery).select(projection);
+
+        if (role === "interviewer") {
+            finedInterviewsQuery = finedInterviewsQuery
                 .populate("candidate", "name email")
-                .populate("interviewer", "name email")
                 .populate({
                     path: "problems.problem",
                     select: "title"
-                })
+                });
+        }
+
+        if (role === "candidate") {
+            finedInterviewsQuery = finedInterviewsQuery.populate("interviewer", "name email");
+        }
+
+        const [interviews, total] = await Promise.all([
+            finedInterviewsQuery
                 .sort({ scheduledAt: 1 })
                 .skip(skip)
                 .limit(limit)
@@ -122,21 +143,8 @@ export const interviewService = {
             Interview.countDocuments(searchQuery)
         ]);
 
-        const result = null;
-
-        if (role === "candidate") {
-            result = interviews.map(interview => {
-                delete interview.candidate,
-                    delete interview.problems
-            });
-        } else {
-            result = interviews.map(interview => {
-                delete interview.interviewer
-            });
-        };
-
         return {
-            result,
+            result: interviews,
             total,
             limit,
             skip,
@@ -200,6 +208,27 @@ export const interviewService = {
 
     /**
      * ==========================================
+     *           Get Interview Session details
+     * ==========================================
+     * @param { uuid } interviewId 
+     * @returns { interview }
+     */
+    async interviewById(interviewId) {
+
+        // Fetch interview 
+        const interview = await Interview.findById(interviewId)
+            .populate("candidate", "name email")
+            .populate("interviewer", "name email");
+
+        if (!interview) throw new ApiError(404, "Interview not found");
+
+        return {interview};
+
+    },
+
+
+    /**
+     * ==========================================
      *           Join Interview Session
      * ==========================================
      * @param { uuid } userId 
@@ -237,7 +266,7 @@ export const interviewService = {
                 const channel = chatClient.channel("messaging", interview.callId);
 
                 // Add member to channel
-                await channel.addMembers([{ userId: userId, role: "candidate" }])
+                await channel.addMembers([userId.toString()]);
             } catch (err) {
                 console.log(err.message);
             }
@@ -284,7 +313,7 @@ export const interviewService = {
 
                 // Delete Chat channel
                 const channel = chatClient.channel("messaging", interview.callId);
-                await channel.delete(); 
+                await channel.delete();
 
                 // Complete the Interview
                 interview.complete();
@@ -299,5 +328,14 @@ export const interviewService = {
             callId: interview.callId,
             status: interview.status
         };
+    },
+
+    /**
+     * 
+     */
+    async streamToken (userId) {
+        const token = chatClient.createToken(userId);
+
+        return token;
     }
 };

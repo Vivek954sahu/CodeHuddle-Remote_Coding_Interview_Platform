@@ -1,8 +1,25 @@
 import { LuFileCode2 } from "react-icons/lu";
-import { Link } from "react-router";
+import { Link, Navigate } from "react-router";
 import SignUpForm from "../../components/auth/SignUpForm";
+import { useAuth } from "../../context/AuthContext";
 
 const SignUp = () => {
+    const { user } = useAuth();
+    
+      if (user) {
+        if (user.role === "admin") {
+          return <Navigate to="/admin/dashboard" replace />;
+        }
+    
+        if (user.role === "interviewer") {
+          return <Navigate to="/interviewer/dashboard" replace />;
+        }
+    
+        if (user.role === "candidate") {
+          return <Navigate to="/candidate/dashboard" replace />;
+        }
+      };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#f6f6f7]">
       <div className="w-full max-w-md px-4 py-8">
