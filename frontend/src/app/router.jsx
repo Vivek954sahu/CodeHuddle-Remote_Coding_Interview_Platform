@@ -13,6 +13,8 @@ import Login from "../pages/auth/Login";
 import SignUp from "../pages/auth/SignUp";
 import InterviewerDashboard from "../pages/dashboards/InterviewerDashboard";
 import NotFound from "../pages/NotFound";
+import ProblemPage from "../pages/problems/ProblemPage";
+import CreateInterview from "../pages/interview/CreateInterview";
 
 
 
@@ -43,6 +45,10 @@ export const router = createBrowserRouter([
                     {
                         path: "/interviewer/dashboard",
                         element: <InterviewerDashboard />,
+                    },
+                    {
+                        path: "/interviewer/create",
+                        element: <CreateInterview />
                     }
                 ],
             },
@@ -73,6 +79,16 @@ export const router = createBrowserRouter([
                     {
                         path: "/interview/:id",
                         element: <InterviewRoom />,
+                    }
+                ],
+            },
+
+            {
+                element: <RoleRoute allowedRoles={["interviewer", "admin"]} />,
+                children: [
+                    {
+                        path: "/problems",
+                        element: <ProblemPage />,
                     }
                 ],
             }

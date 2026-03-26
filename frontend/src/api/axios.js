@@ -1,4 +1,5 @@
 import axios from "axios";
+import { refreshToken } from "./authApi";
 
 const Axios = axios.create({
     baseURL: "http://localhost:3000/api/",
@@ -35,14 +36,16 @@ Axios.interceptors.response.use(
 
             try {
 
-                const res = await Axios.post("/v1/auth/refresh", {});
+                const res = await refreshToken();
 
                 const newAccessToken = res.data.accessToken;
 
                 localStorage.setItem("accessToken", newAccessToken);
+                Axios.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
                 originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
                 return Axios(originalRequest);
+
             } catch (refreshError) {
                 localStorage.removeItem("accessToken");
                 localStorage.removeItem("user");

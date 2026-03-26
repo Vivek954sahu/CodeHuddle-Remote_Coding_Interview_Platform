@@ -1,0 +1,118 @@
+import {
+  CallControls,
+  CallingState,
+  SpeakerLayout,
+  useCallStateHooks,
+} from "@stream-io/video-react-sdk";
+import { Channel, Chat, MessageInput, MessageList, Thread, Window } from "stream-chat-react";
+import { useNavigate } from "react-router";
+
+import { useState } from "react";
+import { LuLoader, LuMessageSquare, LuUser, LuX } from "react-icons/lu";
+import { useAuth } from "../../context/AuthContext";
+
+import "@stream-io/video-react-sdk/dist/css/styles.css";
+import "stream-chat-react/dist/css/v2/index.css";
+
+
+const VideoCallUI = ({ chatClient, channel }) => {
+
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const { useCallCallingState, useParticipantCount } = useCallStateHooks();
+  const callingState = useCallCallingState();
+  const participantCount = useParticipantCount();
+
+  const [isChatOpen, setIsChatOpen] = useState(false);
+
+  const handleLeave = () => {
+    if(user.role === "interviewer") {
+      navigate("/interviewer/dashboard");
+    } else {
+      navigate("/candidate/dashboard");
+    }
+  }
+
+  if (callingState !== CallingState.JOINED) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="text-center">
+          <LuLoader className="h-12 w-12 animate-spin mx-auto text-primary mb-4" />
+          <p className="text-lg">Joining call...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-full flex gap-3 relative str-video">
+      <div className="flex-1 flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-2 bg-base-100 p-3 rounded-lg shadow">
+          <div className="flex items-center gap-2">
+            <LuUser className="w-5 h-5 text-primary" />
+            <span className="font-semibold">
+              {participantCount}{" "}
+              {participantCount === 1 ? "participant" : "participants"}
+            </span>
+          </div>
+
+          {chatClient && channel && (
+            <button
+              onClick={() => setIsChatOpen(!isChatOpen)}
+              className={`${isChatOpen ? "btn-primary" : "btn-ghost"}`}
+              title={isChatOpen ? "Hide chat" : "Show chat"}
+            >
+              <LuMessageSquare className="h-4 w-4" />
+              Chat
+            </button>
+          )}
+        </div>
+
+        <div className="flex-1 bg-base-300 rounded-lg overflow-hidden relative">
+          <SpeakerLayout />
+        </div>
+
+        <div className="bg-base-100 p-3 rounded-lg shadow flex justify-center">
+          <CallControls onLeave={() => handleLeave()} />
+        </div>
+      </div>
+
+      {chatClient && channel && (
+        <div
+          className={`flex flex-col rounded-lg shadow overflow-hidden bg-[#272a30] transition-all duration-300 ease-in-out ${
+            isChatOpen ? "w-80 opacity-100" : "w-0 opacity-0"
+          }`}
+        >
+          {isChatOpen && (
+            <>
+              <div className="bg-[#1c1e22] p-3 border-b border-[#3a3d44] flex items-center justify-between">
+                <h3 className="font-semibold text-white">Interview Chat</h3>
+                <button
+                  onClick={() => setIsChatOpen(false)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                  title="Close chat"
+                >
+                  <LuX className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="flex-1 overflow-hidden stream-chat-dark">
+                <Chat client={chatClient} theme="str-chat__theme-dark">
+                  <Channel channel={channel}>
+                    <Window>
+                      <MessageList />
+                      <MessageInput />
+                    </Window>
+                    <Thread />
+                  </Channel>
+                </Chat>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default VideoCallUI;
