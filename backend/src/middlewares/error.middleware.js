@@ -13,7 +13,7 @@ export const globalErrHandler = (err, req, res, next) => {
     if (!(error instanceof ApiError)) {
         error = new ApiError(
             500,
-            "Internal Server Error" + err,
+            "Internal Server Error" + err.message,
             {
                 code: "UNEXPECTED_ERROR",
             }
