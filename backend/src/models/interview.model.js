@@ -22,7 +22,6 @@ const interviewProblemSchema = new Schema({
     submission: {
         submissionId: {
             type: String,
-            required: true
         },
         language: String,
         status: String, // ACCEPTED, WA, TLE, RUNTIME_ERROR
