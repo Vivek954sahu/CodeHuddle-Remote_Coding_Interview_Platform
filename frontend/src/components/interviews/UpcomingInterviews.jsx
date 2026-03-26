@@ -111,7 +111,7 @@ const UpcomingInterviews = ({ upcomingInterviews }) => {
             
             {/* Fetch problems for interviewer */}
               {user.role === "interviewer" && (<div className="flex flex-wrap gap-1">
-                {interview.problems?.map((p) => (
+                {interview.problems?.filter((p) => p?.problem).map((p) => (
                   <div key={p.problem._id} className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors bg-purple-100 text-[hsl(240,5%,10%)]"
                   >
                     <LuCode className="h-3 w-3 mr-1"/>
