@@ -17,7 +17,7 @@ const DashboardLayout = ({ children }) => {
         {/* toggle sidebar */}
         <button
         onClick={() => setSideBarCollapsed(!sideBarCollapsed)}
-        className="fixed top-20 z-50 transition-all duration-300 bg-purple-100 border border-purple-400 shadow-sm hover:bg-gray-500 h-10 w-10 inline-flex items-center justify-center rounded-md gap-2"
+        className={`fixed top-20 z-50 ${!sideBarCollapsed && "left-50"} transition-all duration-300 bg-purple-100 border border-purple-400 shadow-sm hover:bg-gray-500 h-10 w-10 inline-flex items-center justify-center rounded-md gap-2`}
         >
             {sideBarCollapsed ? 
              <LuPanelLeftOpen className="h-4 w-4" /> :
