@@ -3,7 +3,7 @@ import { getUpcomingInterviews } from "../api/interviewsApi";
 
 export const useUpcomingInterviews = () => {
 
-    const [interviews, setInterviews] = useState([]);
+    const [upcomingInterviews, setUpcomingInterviews] = useState([]);
     const [page, setPage] = useState(1);
 
     const [loading, setLoading] = useState(false);
@@ -22,7 +22,7 @@ export const useUpcomingInterviews = () => {
 
             const data = res.data.data;
 
-            setInterviews(prev => [...prev, ...data.result]);
+            setUpcomingInterviews(data.result);
             setHasMore(data.hasMore);
 
         } catch (error) {
@@ -36,12 +36,12 @@ export const useUpcomingInterviews = () => {
         }
     };
 
-    // Fetch interviews for next pages
+    // Fetch interviews
     useEffect(() => {
       
         fetchUpcomingInterviews();
 
-    }, [page]);
+    }, []);
 
     // update the page for more interviews
     const loadMore = () => {
@@ -51,7 +51,7 @@ export const useUpcomingInterviews = () => {
     };
 
     return {
-        interviews,
+        upcomingInterviews,
         loading,
         error,
         hasMore,
