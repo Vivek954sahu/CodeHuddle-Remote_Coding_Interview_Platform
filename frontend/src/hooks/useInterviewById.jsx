@@ -13,7 +13,7 @@ const useInterviewById = (id) => {
             setLoading(true);
 
             const res = await interviewById(id);
-            setInterview(res.data.data);
+            setInterview(res.data.data.interview);
 
         } catch (err) {
             setError(err.response?.data?.message || "Failed to fetch interview!");
@@ -25,10 +25,16 @@ const useInterviewById = (id) => {
     useEffect(() => {
         fetchInterview();
 
-        const interval = setInterval(fetchInterview, 5000);
+        // Only poll if interview is active
+        // let interval;
+        // if (interview?.status === 'SCHEDULED' || interview?.status === 'IN_PROGRESS') {
+        //     interval = setInterval(fetchInterview, 30000); 
+        // }
 
-        return () => clearInterval(interval);
-    }, [id]);
+        // return () => {
+        //     if (interval) clearInterval(interval);
+        // };
+    }, [id, interview?.status]);
 
     return {interview, loading, error, refetch: fetchInterview};
 }

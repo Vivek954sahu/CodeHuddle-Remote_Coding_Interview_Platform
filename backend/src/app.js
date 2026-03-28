@@ -4,6 +4,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import passport from "passport";
 import path from "path";
+import cookieParser from "cookie-parser";
 import { serve } from "inngest/express";
 
 import { logger } from "./utils/logger.js";
@@ -48,6 +49,9 @@ app.use(
         },
     })
 );
+
+// cookie parser
+app.use(cookieParser());
 
 // initiate passport
 app.use(passport.initialize());
