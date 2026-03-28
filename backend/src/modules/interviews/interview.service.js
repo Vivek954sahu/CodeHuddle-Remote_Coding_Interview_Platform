@@ -218,7 +218,8 @@ export const interviewService = {
         // Fetch interview 
         const interview = await Interview.findById(interviewId)
             .populate("candidate", "name email")
-            .populate("interviewer", "name email");
+            .populate("interviewer", "name email")
+            .populate("problems.problem", "title slug description difficulty supportedLanguages testcases samples");
 
         if (!interview) throw new ApiError(404, "Interview not found");
 

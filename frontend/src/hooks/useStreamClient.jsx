@@ -1,50 +1,77 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { disconnectStreamClient, initializeStreamClient } from '../lib/stream';
 import { getStreamToken } from '../api/interviewsApi';
 import { StreamChat } from "stream-chat";
 import { useAuth } from '../context/AuthContext';
 
-const useStreamClient = (interview, loadingInterview) => {
+const useStreamClient = (interview, loadingInterview, isCandidate, isInterviewer) => {
 
     const { user } = useAuth();
+
     const [streamClient, setStreamClient] = useState(null);
     const [call, setCall] = useState(null);
     const [chatClient, setChatClient] = useState(null);
     const [channel, setChannel] = useState(null);
     const [isInitializingCall, setIsInitializingCall] = useState(true);
 
+    const videoCallRef = useRef(null);
+    const chatClientRef = useRef(null);
+    const initializedRef = useRef(false);
+
     useEffect(() => {
-      let videoCall = null;
-      let chatClientInstance = null;
+    //   let videoCall = null;
+    //   let chatClientInstance = null;
 
       const initCall = async () => {
-        if(!interview?.callId) return;
-        if(["COMPLETED","EXPIRED", "CANCELLED"].includes(interview.status)) return;
+        if(!interview?.callId || !user?._id) {
+          console.log('Missing interview.callId or user._id');
+          return;
+        }
+        if(["COMPLETED","EXPIRED", "CANCELLED"].includes(interview.status)) {
+          console.log('Interview status prevents initialization');
+          return;
+        }
+
+        if(!isCandidate && !isInterviewer) return;
+        
+        if(initializedRef.current) {
+          return;
+        }
 
         try {
+
             // Fetch Stream token from backend
             const tokenRes = await getStreamToken();
-            const token = tokenRes.data.data;
+            const token = tokenRes?.data?.data;
+
+            if (!token) throw new Error("Invalid or Missing Stream token");
 
             // Initialize video client
-            const client = await initializeStreamClient({id : user.id}, token);
+            const client = await initializeStreamClient({id : user._id, name: user.name}, token);
             setStreamClient(client);
 
             // Joining video call
-            videoCall = client.call("default", interview.callId);
+            const videoCall = client.call("default", interview.callId);
             await videoCall.join({ create: true });
-            setCall(videoCall);
+
+            videoCallRef.current = videoCall;
+            setCall(videoCallRef.current);
 
             // Chat instance
             const apiKey = import.meta.env.VITE_STREAM_API_KEY;
-            chatClientInstance = StreamChat.getInstance(apiKey);
 
-            await chatClientInstance.connectUser({ id: user.id }, token);
-            setChatClient(chatClientInstance);
+            const chatClientInstance = StreamChat.getInstance(apiKey);
+
+            await chatClientInstance.connectUser({ id: user._id, name: user.name }, token);
+
+            chatClientRef.current = chatClientInstance;
+            setChatClient(chatClientRef.current);
 
             const chatChannel = chatClientInstance.channel("messaging", interview.callId);
             await chatChannel.watch();
+
             setChannel(chatChannel);
+            initializedRef.current = true;
 
         } catch (error) {
             console.error("failed to init call", error);
@@ -58,16 +85,24 @@ const useStreamClient = (interview, loadingInterview) => {
         return () => {
             (async () => {
                 try {
-                    if(videoCall) await videoCall.leave();
-                if(chatClientInstance) await chatClientInstance.disconnectUser();
+                    if(videoCallRef.current) {
+                         await videoCallRef.current.leave();
+                         videoCallRef.current = null;
+                    }
+                    if(chatClientRef.current) {
+                        await chatClientRef.current.disconnectUser();
+                        chatClientRef.current = null;
+                    }
 
                 await disconnectStreamClient();
+                initializedRef.current = false; // Reset initialization flag
+
                 } catch (error) {
                     console.log("cleanUp error: ", error);
                 }
             })();
         };
-    }, [interview, loadingInterview]);
+    }, [interview, loadingInterview, user]);
     
 
   return { streamClient, chatClient, call, channel, isInitializingCall };
