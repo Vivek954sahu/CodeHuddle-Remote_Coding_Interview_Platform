@@ -1,7 +1,7 @@
 import Editor from "@monaco-editor/react";
 import { LANGUAGE_CONFIG } from "../../data/language";
 import { LuLoaderCircle, LuPlay } from "react-icons/lu";
-import { IconBase } from "react-icons/lib";
+
 
 const CodeEditor = ({selectedLanguage, code, isRunning, onLanguageChange, onCodeChange, onRunCode }) => {
 
@@ -11,7 +11,7 @@ const CodeEditor = ({selectedLanguage, code, isRunning, onLanguageChange, onCode
     <div className="h-full bg-base-300 flex flex-col">
       <div className="flex items-center justify-between px-4 py-3 bg-base-100 boirder-t border-base-300">
         <div className="flex items-center gap-3">
-            <div>{icon && <IconBase/>}</div>
+            <div>{icon && <icon className="h-5 w-5" />}</div>
              <select value={selectedLanguage} onChange={onLanguageChange}>
                 {Object.entries(LANGUAGE_CONFIG).map(([key, lang]) => {
                     <option key={key} value={key}>

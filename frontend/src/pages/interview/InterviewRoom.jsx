@@ -158,7 +158,7 @@ const InterviewRoom = () => {
                   </div>
 
                   {/* TEST CASES */}
-                  <div className="bg-base-100 p-4 rounded-lg">
+                  <div className="bg-purple-100 p-4 rounded-lg">
                     <h2 className="font-bold mb-2">Test Cases</h2>
 
                     {problemData[0]?.testcases
