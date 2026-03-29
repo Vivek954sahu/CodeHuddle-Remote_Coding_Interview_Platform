@@ -39,7 +39,7 @@ Axios.interceptors.response.use(
 
                 const res = await refreshToken();
 
-                const newAccessToken = res.data.accessToken;
+                const newAccessToken = res.data.data.accessToken;
 
                 localStorage.setItem("accessToken", newAccessToken);
                 Axios.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
