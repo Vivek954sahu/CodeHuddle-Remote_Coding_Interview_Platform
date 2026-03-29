@@ -24,8 +24,14 @@ const __dirname = path.resolve();
     =====  Global Middlewares =====
 ----------------------------------------------------------------------------------------------*/
 
-// security headers
-app.use(helmet());
+// security headers{}
+app.use(helmet.contentSecurityPolicy({
+    directives: {
+        defaultSrc : ["'self'"],
+
+        connectSrc: ["'self'", "https:", "wss:"]
+    },
+}));
 
 // enabling cors
 app.use(
