@@ -67,11 +67,6 @@ export const AuthProvider = ({ children }) => {
 
     // Log out
     const logout = async() => {
-        try {
-            await logoutUser();
-        } catch (error) {
-            throw error.response?.data?.message || "Logout Failed!";
-        } 
 
         localStorage.removeItem("accessToken");
         localStorage.removeItem("user");
