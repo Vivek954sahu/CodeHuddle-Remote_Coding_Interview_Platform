@@ -6,7 +6,6 @@ import {
     login,
     register,
     refreshToken,
-    logout,
     oauthCallback
 } from "./auth.controller.js";
 
