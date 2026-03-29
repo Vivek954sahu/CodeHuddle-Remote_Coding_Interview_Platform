@@ -82,12 +82,6 @@ router.get(
  * ==============================================================
  */
 
-/**
- * @route  POST /api/auth/logout
- * @desc   Logout user (invalidate refresh token)
- * @access Private
- */
-router.post("/logout", authenticate, asyncHandler(logout));
 
 /**
  * ==============================================================

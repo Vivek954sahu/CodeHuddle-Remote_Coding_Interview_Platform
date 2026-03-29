@@ -150,18 +150,6 @@ export const authService = {
 
     },
 
-    /** ------------------------------------------------------
-     * ------------------ Logout User ------------------------
-     * -------------------------------------------------------
-     */
-    async logout(refreshToken) {
-        if (!refreshToken) return;
-
-        await User.updateOne(
-            { refreshToken: refreshToken },
-            { $set: { refreshToken: null } }
-        );
-    },
 
     /** ---------------------------------------------------------
      * ---------- OAuth Login by Google -------------------------

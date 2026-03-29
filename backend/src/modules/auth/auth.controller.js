@@ -87,26 +87,6 @@ export const refreshToken = async (req, res) => {
     );
 };
 
-/**
- * ====================================================================================
- * Logout User
- * ====================================================================================
- */
-export const logout = async (req, res) => {
-    const refreshToken = req.cookies?.[COOKIE_NAMES.REFRESH_TOKEN];
-
-    if (refreshToken) {
-        await authService.logout(refreshToken);
-    }
-
-    res.clearCookie(COOKIE_NAMES.REFRESH_TOKEN, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict"
-    });
-
-    return res.ok(null, "Logged out successfully", null);
-};
 
 /**
  * ====================================================================================
