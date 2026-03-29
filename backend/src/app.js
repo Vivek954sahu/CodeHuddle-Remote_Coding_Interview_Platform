@@ -29,7 +29,15 @@ app.use(helmet.contentSecurityPolicy({
     directives: {
         defaultSrc : ["'self'"],
 
-        connectSrc: ["'self'", "https:", "wss:"]
+        connectSrc: ["'self'", "https:", "wss:"],
+
+        scriptSrc: ["'self'", "'unsafe-eval'"],
+
+        workerSrc: ["'self'", "blob:"],
+
+        styleSrc: ["'self'", "'unsafe-inline'"],
+
+        imgSrc: ["'self'", "https:", "data:"]
     },
 }));
 
