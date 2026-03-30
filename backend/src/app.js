@@ -31,9 +31,9 @@ app.use(helmet.contentSecurityPolicy({
 
         connectSrc: ["'self'", "https:", "wss:"],
 
-        scriptSrc: ["'self'", "'unsafe-eval'"],
+        scriptSrc: ["'self'", "'unsafe-eval'", "https://cdn.jsdelivr.net"],
 
-        workerSrc: ["'self'", "blob:"],
+        workerSrc: ["'self'", "blob:", "https://cdn.jsdelivr.net"],
 
         styleSrc: ["'self'", "'unsafe-inline'"],
 
