@@ -17,6 +17,7 @@ import CodeEditor from "../../components/interviewRoom/CodeEditor";
 import OutputPanel from "../../components/interviewRoom/OutputPanel";
 import { useAuth } from "../../context/AuthContext";
 import useStreamClient from "../../hooks/useStreamClient";
+import { executeCode } from "../../lib/piston";
 
 const InterviewRoom = () => {
   const { user } = useAuth();
@@ -38,7 +39,8 @@ const InterviewRoom = () => {
   const { streamClient, call, chatClient, channel, isInitializingCall } =
     useStreamClient(interview, loading, isCandidate, isInterviewer);
 
-  const problemData = interview?.problems?.map((p) => p.problem)?.filter(Boolean) || [];
+  const problemData =
+    interview?.problems?.map((p) => p.problem)?.filter(Boolean) || [];
 
   const [selectedLanguage, setSelectedLanguage] = useState("javascript");
   const [code, setCode] = useState("");
@@ -99,83 +101,85 @@ const InterviewRoom = () => {
           <Panel defaultSize={50} minSize={30}>
             <Group orientation="vertical">
               {/* Problem Desc Panel */}
-              <Panel defaultSize={50} minSize={20}>
-                <div className="flex-1 overflow-y-auto p-6 bg-purple-200">
-                  {/* HEADER */}
-                  <div className="mb-6">
-                    <h1 className="text-2xl font-bold">
-                      {problemData[0]?.title || "Loading..."}
-                    </h1>
+              {user.role === "candidate" && (
+                <Panel defaultSize={50} minSize={20}>
+                  <div className="flex-1 overflow-y-auto p-6 bg-purple-200">
+                    {/* HEADER */}
+                    <div className="mb-6">
+                      <h1 className="text-2xl font-bold">
+                        {problemData[0]?.title || "Loading..."}
+                      </h1>
 
-                    <div className="flex items-center gap-3 mt-2">
-                      {/* <span
+                      <div className="flex items-center gap-3 mt-2">
+                        {/* <span
                   className={`badge ${getDifficultyBadgeClass(session?.difficulty)}`}
                 >
                   {?.difficulty}
                 </span> */}
 
-                      {isInterviewer && interview?.status === "COMPLETED" && (
-                        <button
-                          onClick={handleEndSession}
-                          className="btn btn-error btn-sm gap-2"
-                        >
-                          {ending ? (
-                            <LuLoaderCircle className="animate-spin w-4 h-4" />
-                          ) : (
-                            <LuLogOut className="w-4 h-4" />
-                          )}
-                          End
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* DESCRIPTION */}
-                  <div className="bg-base-100 p-4 rounded-lg mb-4">
-                    <h2 className="font-bold mb-2">Description</h2>
-                    <p>{problemData[0]?.description}</p>
-                  </div>
-
-                  {/* EXAMPLES */}
-                  <div className="bg-base-100 p-4 rounded-lg mb-4">
-                    <h2 className="font-bold mb-2">Examples</h2>
-
-                    {problemData[0]?.samples?.map((ex, i) => (
-                      <div key={i} className="mb-3 bg-base-200 p-3 rounded">
-                        <div>
-                          <b>Input:</b> {ex.input}
-                        </div>
-                        <div>
-                          <b>Output:</b> {ex.output}
-                        </div>
-                        {ex.explanation && (
-                          <div className="text-sm text-gray-500">
-                            {ex.explanation}
-                          </div>
+                        {isInterviewer && interview?.status === "COMPLETED" && (
+                          <button
+                            onClick={handleEndSession}
+                            className="btn btn-error btn-sm gap-2"
+                          >
+                            {ending ? (
+                              <LuLoaderCircle className="animate-spin w-4 h-4" />
+                            ) : (
+                              <LuLogOut className="w-4 h-4" />
+                            )}
+                            End
+                          </button>
                         )}
                       </div>
-                    ))}
-                  </div>
+                    </div>
 
-                  {/* TEST CASES */}
-                  <div className="bg-purple-100 p-4 rounded-lg">
-                    <h2 className="font-bold mb-2">Test Cases</h2>
+                    {/* DESCRIPTION */}
+                    <div className="bg-purple-100 p-4 rounded-lg mb-4">
+                      <h2 className="font-bold mb-2">Description</h2>
+                      <p>{problemData[0]?.description}</p>
+                    </div>
 
-                    {problemData[0]?.testcases
-                      ?.filter((tc) => !tc.isHidden)
-                      .map((tc, i) => (
-                        <div key={i} className="mb-2 text-sm">
+                    {/* EXAMPLES */}
+                    <div className="bg-base-100 p-4 rounded-lg mb-4">
+                      <h2 className="font-bold mb-2">Examples</h2>
+
+                      {problemData[0]?.samples?.map((ex, i) => (
+                        <div key={i} className="mb-3 bg-purple-200 p-3 rounded">
                           <div>
-                            <b>Input:</b> {tc.input}
+                            <b>Input:</b> {ex.input}
                           </div>
                           <div>
-                            <b>Expected:</b> {tc.expectedOutput}
+                            <b>Output:</b> {ex.output}
                           </div>
+                          {ex.explanation && (
+                            <div className="text-sm text-gray-500">
+                              {ex.explanation}
+                            </div>
+                          )}
                         </div>
                       ))}
+                    </div>
+
+                    {/* TEST CASES */}
+                    <div className="bg-purple-200 p-4 rounded-lg">
+                      <h2 className="font-bold mb-2">Test Cases</h2>
+
+                      {problemData[0]?.testcases
+                        ?.filter((tc) => !tc.isHidden)
+                        .map((tc, i) => (
+                          <div key={i} className="mb-2 text-sm">
+                            <div>
+                              <b>Input:</b> {tc.input}
+                            </div>
+                            <div>
+                              <b>Expected:</b> {tc.expectedOutput}
+                            </div>
+                          </div>
+                        ))}
+                    </div>
                   </div>
-                </div>
-              </Panel>
+                </Panel>
+              )}
 
               <Separator className="h-2 bg-purple-300 hover:bg-purple-500 transition-colors cursor-col-resize" />
 
