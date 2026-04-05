@@ -59,6 +59,7 @@ const useStreamClient = (interview, loadingInterview, isCandidate, isInterviewer
 
             // Chat instance
             const apiKey = import.meta.env.VITE_STREAM_API_KEY;
+            // const apiKey = '';
 
             const chatClientInstance = StreamChat.getInstance(apiKey);
 
